@@ -29,6 +29,11 @@ export class NotesController {
     return await this.notesService.findOneById(id);
   }
 
+  @Get('/category/:id')
+  async findOneByCategory(@Param('id') id) {
+    return await this.notesService.findByCategory(id);
+  }
+
   @Patch(':id')
   async update(@Param('id') id: number, @Body() body: UpdateNoteDto) {
     return await this.notesService.update(id, body);
@@ -37,6 +42,15 @@ export class NotesController {
   @Delete(':id')
   async remove(@Param('id') id: number) {
     const deletedNote = await this.notesService.remove(id);
+    return deletedNote;
+  }
+
+  @Delete('/delete-category/note/:noteId/category/:categoryId')
+  async removeRelation(
+    @Param('noteId') noteId: number,
+    @Param('categoryId') categoryId: number,
+  ) {
+    const deletedNote = await this.notesService.removeNoteCategory(noteId, categoryId);
     return deletedNote;
   }
 }

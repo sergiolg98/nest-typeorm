@@ -17,6 +17,8 @@ export const DataSourceConfig: DataSourceOptions = {
   database: config.get('DATABASE_NAME'),
   synchronize: true, // @todo quitar luego
   entities: [__dirname + '/../**/**/*.entity{.ts,.js}'],
+  logger: 'debug',
+  debug: true
 };
 
 export const AppDataSource = new DataSource(DataSourceConfig);
