@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { NotesService } from '../services/notes.service';
 import { CreateNoteDto } from '../dto/create-note.dto';
 import { UpdateNoteDto } from '../dto/update-note.dto';
+import { CategoryToNoteDto } from '../dto/add-category-note.dto';
 
 @Controller('/notes')
 export class NotesController {
@@ -11,6 +12,11 @@ export class NotesController {
   async create(@Body() body: CreateNoteDto) {
     const noteCreated = await this.notesService.create(body);
     return noteCreated;
+  }
+
+  @Post('add-category')
+  async addCategoryToNote(@Body() body: CategoryToNoteDto) {
+    return await this.notesService.addCategoryToNote(body);
   }
 
   @Get()

@@ -4,6 +4,8 @@ import { UpdateNoteDto } from '../dto/update-note.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { NoteEntity } from '../entities/note.entity';
 import { DeleteResult, Repository, UpdateResult } from 'typeorm';
+import { NotesCategoriesEntity } from '../entities/notes_categories.entity';
+import { CategoryToNoteDto } from '../dto/add-category-note.dto';
 
 @Injectable()
 export class NotesService {
@@ -11,11 +13,22 @@ export class NotesService {
   constructor(
     @InjectRepository(NoteEntity)
     private readonly notesRepository: Repository<NoteEntity>,
+
+    @InjectRepository(NotesCategoriesEntity)
+    private readonly notesCategoriesRepository: Repository<NotesCategoriesEntity>,
   ) { }
 
   async create(createNoteDto: CreateNoteDto): Promise<NoteEntity> {
     try {
       return await this.notesRepository.save(createNoteDto);
+    } catch (error) {
+      throw new Error(error);
+    }
+  }
+
+  async addCategoryToNote(body: CategoryToNoteDto) {
+    try {
+      return await this.notesCategoriesRepository.save(body);
     } catch (error) {
       throw new Error(error);
     }
@@ -33,6 +46,8 @@ export class NotesService {
     try {
       return await this.notesRepository.createQueryBuilder('notes')
         .where({id})
+        .leftJoinAndSelect('notes.categoriesIncludes', 'categoriesIncludes')
+        .leftJoinAndSelect('categoriesIncludes.category', 'category')
         .getOne();
     } catch (error) {
       throw new Error(error);
