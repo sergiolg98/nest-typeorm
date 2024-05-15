@@ -30,7 +30,19 @@ export class NotesService {
       note.active = active ?? true;
 
       const noteCreated = await this.notesRepository.save(note);
-      await this.createRelationsForNote(noteCreated.id!, categoryIds);
+
+      if (categoryIds.length > 0) {
+        await Promise.all(
+          categoryIds.map(async (categoryId) => {
+            const category = await this.categoryRepository.findOne({ where: { id: categoryId } });
+            const body: any = {
+              category: category.id,
+              note: noteCreated.id!,
+            }
+            await this.notesCategoriesRepository.save(body);
+          })
+        );
+      }
 
       return noteCreated;
     } catch (error) {
@@ -89,17 +101,17 @@ export class NotesService {
 
   async findByCategories(categoryIds: number[]): Promise<NoteEntity[]> {
     try {
-      if(categoryIds.length === 0)
+      if (categoryIds.length === 0)
         return [];
-      
+
       const notes = await this.notesRepository
         .createQueryBuilder('notes')
         .leftJoinAndSelect('notes.categoriesIncludes', 'categoriesIncludes')
         .leftJoinAndSelect('categoriesIncludes.category', 'category')
         .where('category.id IN (:...ids)', { ids: categoryIds })
         .getMany();
-     
-        return notes;
+
+      return notes;
 
     } catch (error) {
       throw new Error('Error fetching notes by categories: ' + error.message);
@@ -148,21 +160,7 @@ export class NotesService {
   }
 
   // PRIVATE FUNCTIONS FOR RELATIONS
-  private async createRelationsForNote(
-    noteId: number,
-    categoryIds: number[]
-  ) {
-    if (categoryIds.length > 0) {
-      categoryIds.forEach(async (categoryId) => {
-        const category = await this.categoryRepository.findOne({ where: { id: categoryId } });
-        const body: any = {
-          category: category.id,
-          note: noteId,
-        }
-        await this.notesCategoriesRepository.save(body);
-      });
-    }
-  }
+
 
   private async updateRelations(
     noteId: number,
@@ -174,7 +172,16 @@ export class NotesService {
       // Get rid of all relations
       const deleted: DeleteResult = await this.removeRelations(noteId);
       // Create again relations based on categoryIds array
-      await this.createRelationsForNote(noteId, categoryIds);
+      if (categoryIds.length > 0) {
+        for (const categoryId of categoryIds) {
+          const category = await this.categoryRepository.findOne({ where: { id: categoryId } });
+          const body: any = {
+            category: category.id,
+            note: noteId,
+          }
+          await this.notesCategoriesRepository.save(body);
+        }
+      }
 
     } catch (error) {
       throw new Error(error);
