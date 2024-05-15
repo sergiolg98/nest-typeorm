@@ -12,7 +12,10 @@ export class NoteEntity extends BaseEntity implements INote{
   @Column({ default: true })
   active: boolean;
 
-  @OneToMany(() => NotesCategoriesEntity, (notesCategories) => notesCategories.note)
+  @OneToMany(
+    () => NotesCategoriesEntity,
+    (notesCategories) => notesCategories.note,
+  )
   categoriesIncludes: NotesCategoriesEntity[];
 
 

@@ -40,6 +40,18 @@ export class NotesService {
     }
   }
 
+  async findAllByActive(flag: boolean = true): Promise<NoteEntity[]> {
+    try {
+      return await this.notesRepository.find({
+        where: {active: flag},
+        relations: ['categoriesIncludes', 'categoriesIncludes.category'],
+      });
+
+    } catch (error) {
+      throw new Error(error);
+    }
+  }
+
   async findOneById(id: number): Promise<NoteEntity> {
     try {
       return await this.notesRepository.createQueryBuilder('notes')
@@ -92,9 +104,13 @@ export class NotesService {
     }
   }
 
-  async remove(id: number): Promise<DeleteResult | undefined> {
+  async remove(noteId: number): Promise<DeleteResult | undefined> {
     try {
-      const noteDeleted: DeleteResult = await this.notesRepository.delete(id);
+      // delete relations
+      await this.removeRelations(noteId);
+
+      // delete note
+      const noteDeleted: DeleteResult = await this.notesRepository.delete(noteId);
       if (noteDeleted.affected === 0)
         return undefined;
       return noteDeleted;
@@ -111,7 +127,7 @@ export class NotesService {
       // Get the note 
       const { categoryIds } = updateNoteDto;
       // Get rid of all relations
-      const deleted: DeleteResult = await this.removeRelation(noteId);
+      const deleted: DeleteResult = await this.removeRelations(noteId);
       // Create again relations based on categoryIds array
       if(categoryIds.length > 0){
         categoryIds.forEach(async (categoryId) => {
@@ -148,7 +164,7 @@ export class NotesService {
     }
   }
 
-  private async removeRelation(
+  private async removeRelations(
     noteId: number,
   ): Promise<DeleteResult | undefined> {
     try {
