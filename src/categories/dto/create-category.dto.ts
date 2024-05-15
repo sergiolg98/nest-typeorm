@@ -8,6 +8,6 @@ export class CreateCategoryDto {
 
   @IsNotEmpty()
   @IsString()
-  color: string;
+  description: string;
 
 }

@@ -6,8 +6,7 @@ import { NotesCategoriesEntity } from "./notes_categories.entity";
 @Entity({name: 'notes'})
 export class NoteEntity extends BaseEntity implements INote{
 
-  @Column()
-  //@todo cambiar campo de varchar a TEXT para que jale mas espacio
+  @Column({ type: 'text' })
   content: string;
   @Column({ default: true })
   active: boolean;

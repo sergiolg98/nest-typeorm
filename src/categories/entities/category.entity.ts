@@ -9,7 +9,7 @@ export class CategoryEntity extends BaseEntity implements ICategory {
   @Column()
   name: string;
   @Column()
-  color: string;
+  description: string;
 
   @OneToMany(
     () => NotesCategoriesEntity,
