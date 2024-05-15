@@ -57,13 +57,4 @@ export class NotesController {
     const deletedNote = await this.notesService.remove(id);
     return deletedNote;
   }
-
-  // @Delete('/delete-category/note/:noteId/category/:categoryId')
-  // async removeRelation(
-  //   @Param('noteId') noteId: number,
-  //   @Param('categoryId') categoryId: number,
-  // ) {
-  //   const deletedNote = await this.notesService.removeNoteCategory(noteId, categoryId);
-  //   return deletedNote;
-  // }
 }

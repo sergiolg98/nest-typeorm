@@ -3,7 +3,7 @@ import { CreateNoteDto } from '../dto/create-note.dto';
 import { UpdateNoteDto } from '../dto/update-note.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { NoteEntity } from '../entities/note.entity';
-import { DeleteResult, Repository, UpdateResult } from 'typeorm';
+import { DeleteResult, Not, Repository, UpdateResult } from 'typeorm';
 import { NotesCategoriesEntity } from '../entities/notes_categories.entity';
 import { CategoryEntity } from '../../categories/entities/category.entity';
 
@@ -23,7 +23,16 @@ export class NotesService {
 
   async create(createNoteDto: CreateNoteDto): Promise<NoteEntity> {
     try {
-      return await this.notesRepository.save(createNoteDto);
+      const { content, categoryIds } = createNoteDto;
+
+      const note: NoteEntity = new NoteEntity();
+      note.content = content;
+      note.active = true;
+
+      const noteCreated = await this.notesRepository.save(note);
+      await this.createRelationsForNote(noteCreated.id!, categoryIds);
+
+      return noteCreated;
     } catch (error) {
       throw new Error(error);
     }
@@ -43,7 +52,7 @@ export class NotesService {
   async findAllByActive(flag: boolean = true): Promise<NoteEntity[]> {
     try {
       return await this.notesRepository.find({
-        where: {active: flag},
+        where: { active: flag },
         relations: ['categoriesIncludes', 'categoriesIncludes.category'],
       });
 
@@ -83,18 +92,18 @@ export class NotesService {
       const note: NoteEntity = await this.notesRepository.findOne({
         where: { id },
       });
-      if(!note)
+      if (!note)
         throw new BadRequestException(`Note with id ${id} not found.`);
 
       const { content, active } = updateNoteDto;
       note.id = id;
       note.content = content;
       note.active = active;
-      
+
       const noteUpdated: UpdateResult = await this.notesRepository.update(id, note);
       if (noteUpdated.affected === 0)
         return undefined;
-      
+
       //Update relations
       await this.updateRelations(id, updateNoteDto);
 
@@ -119,6 +128,23 @@ export class NotesService {
     }
   }
 
+  // PRIVATE FUNCTIONS FOR RELATIONS
+  private async createRelationsForNote(
+    noteId: number,
+    categoryIds: number[]
+  ) {
+    if (categoryIds.length > 0) {
+      categoryIds.forEach(async (categoryId) => {
+        const category = await this.categoryRepository.findOne({ where: { id: categoryId } });
+        const body: any = {
+          category: category.id,
+          note: noteId,
+        }
+        await this.notesCategoriesRepository.save(body);
+      });
+    }
+  }
+
   private async updateRelations(
     noteId: number,
     updateNoteDto: UpdateNoteDto
@@ -129,36 +155,8 @@ export class NotesService {
       // Get rid of all relations
       const deleted: DeleteResult = await this.removeRelations(noteId);
       // Create again relations based on categoryIds array
-      if(categoryIds.length > 0){
-        categoryIds.forEach(async (categoryId) => {
-          const category = await this.categoryRepository.findOne({ where: { id: categoryId } });
-          console.log(category);
-          const body = {
-            category: category.id,
-            note: noteId, 
-          }
-          this.addCategoryToNote(body);
-        });
-      }
+      await this.createRelationsForNote(noteId, categoryIds);
 
-    } catch (error) {
-      throw new Error(error);
-    }
-  }
-
-  private async addCategoryToNote(body: any) {
-    try {
-      const { category, note } = body;
-      const exists = await this.notesCategoriesRepository.findOne({
-        where: {
-          category: { id: category },
-          note: { id: note },
-        }
-      });
-      if (exists)
-        throw new BadRequestException('La relación ya existe previamente.');
-
-      return await this.notesCategoriesRepository.save(body);
     } catch (error) {
       throw new Error(error);
     }
