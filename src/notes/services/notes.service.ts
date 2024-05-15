@@ -23,11 +23,11 @@ export class NotesService {
 
   async create(createNoteDto: CreateNoteDto): Promise<NoteEntity> {
     try {
-      const { content, categoryIds } = createNoteDto;
+      const { content, active, categoryIds } = createNoteDto;
 
       const note: NoteEntity = new NoteEntity();
       note.content = content;
-      note.active = true;
+      note.active = active ?? true;
 
       const noteCreated = await this.notesRepository.save(note);
       await this.createRelationsForNote(noteCreated.id!, categoryIds);
@@ -49,7 +49,7 @@ export class NotesService {
     }
   }
 
-  async findAllByActive(flag: boolean = true): Promise<NoteEntity[]> {
+  async findAllByFlag(flag: boolean = true): Promise<NoteEntity[]> {
     try {
       return await this.notesRepository.find({
         where: { active: flag },
@@ -84,6 +84,25 @@ export class NotesService {
       return notes;
     } catch (error) {
       throw new Error(error);
+    }
+  }
+
+  async findByCategories(categoryIds: number[]): Promise<NoteEntity[]> {
+    try {
+      if(categoryIds.length === 0)
+        return [];
+      
+      const notes = await this.notesRepository
+        .createQueryBuilder('notes')
+        .leftJoinAndSelect('notes.categoriesIncludes', 'categoriesIncludes')
+        .leftJoinAndSelect('categoriesIncludes.category', 'category')
+        .where('category.id IN (:...ids)', { ids: categoryIds })
+        .getMany();
+     
+        return notes;
+
+    } catch (error) {
+      throw new Error('Error fetching notes by categories: ' + error.message);
     }
   }
 

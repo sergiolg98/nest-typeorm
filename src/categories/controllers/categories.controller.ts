@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { CategoriesService } from '../services/categories.service';
 import { CreateCategoryDto } from '../dto/create-category.dto';
 import { UpdateCategoryDto } from '../dto/update-category.dto';
+import { CategoryEntity } from '../entities/category.entity';
 
 @Controller('/categories')
 export class CategoriesController {
@@ -15,7 +16,10 @@ export class CategoriesController {
 
   @Get()
   async findAll() {
-    return await this.categoriesService.findAll();
+    const categories: CategoryEntity[] = await this.categoriesService.findAll();
+    return {
+      data: categories,
+    }
   }
 
   @Get(':id')

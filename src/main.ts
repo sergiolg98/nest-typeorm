@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
 import { CORS } from './constants';
 import { ValidationPipe } from '@nestjs/common';
+import { GlobalExceptionFilter } from './handlers/errors.handler';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -15,6 +16,7 @@ async function bootstrap() {
       enableImplicitConversion: true,
     }
   }));
+  app.useGlobalFilters(new GlobalExceptionFilter());
   
   await app.listen(config.get('PORT'));
 }

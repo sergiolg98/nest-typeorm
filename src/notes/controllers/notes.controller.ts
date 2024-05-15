@@ -23,7 +23,7 @@ export class NotesController {
 
   @Get('/active')
   async findAllActive() {
-    const notes = await this.notesService.findAllByActive(true);
+    const notes = await this.notesService.findAllByFlag(true);
     return {
       data: notes
     };
@@ -31,7 +31,7 @@ export class NotesController {
 
   @Get('/archived')
   async findAllArchived() {
-    const notes = await this.notesService.findAllByActive(false);
+    const notes = await this.notesService.findAllByFlag(false);
     return {
       data: notes
     };
@@ -45,6 +45,14 @@ export class NotesController {
   @Get('/category/:id')
   async findAllByCategory(@Param('id') id) {
     return await this.notesService.findAllByCategory(id);
+  }
+
+  @Post('/categories/many/')
+  async findByCategories(@Body() body: number[]) {
+    const notes = await this.notesService.findByCategories(body);
+    return {
+      data: notes,
+    }
   }
 
   @Patch(':id')
