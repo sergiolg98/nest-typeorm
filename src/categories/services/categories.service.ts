@@ -19,34 +19,25 @@ export class CategoriesService {
   }
 
   async findAll(): Promise<CategoryEntity[]> {
-    try {
-      return await this.categoryRepository.find();
-    } catch (error) {
-      throw new Error(error);
-    }
+    return await this.categoryRepository.find();
   }
 
   async findOneById(id: number): Promise<CategoryEntity> {
-
     return await this.categoryRepository.createQueryBuilder('categories')
       .where({ id })
       .leftJoinAndSelect('categories.notesIncludes', 'notesIncludes')
       .leftJoinAndSelect('notesIncludes.note', 'note')
       .getOne();
-
   }
 
   async update(id: number, updateCategoryDto: UpdateCategoryDto): Promise<UpdateResult | undefined> {
-
     const updated: UpdateResult = await this.categoryRepository.update(id, updateCategoryDto);
     if (updated.affected === 0)
       return undefined;
     return updated;
-
   }
 
   async remove(categoryId: any): Promise<DeleteResult | undefined> {
-
     const relations: number = await this.categoryRepository
       .createQueryBuilder('categories')
       .leftJoinAndSelect('categories.notesIncludes', 'notesCategory')
@@ -61,6 +52,5 @@ export class CategoriesService {
       return undefined;
 
     return deleted;
-
   }
 }
