@@ -14,14 +14,12 @@ export class NotesController {
     return noteCreated;
   }
 
-  @Post('add-category')
-  async addCategoryToNote(@Body() body: CategoryToNoteDto) {
-    return await this.notesService.addCategoryToNote(body);
-  }
-
   @Get()
   async findAll() {
-    return await this.notesService.findAll();
+    const notes = await this.notesService.findAll();
+    return {
+      data: notes
+    };
   }
 
   @Get(':id')
@@ -30,8 +28,8 @@ export class NotesController {
   }
 
   @Get('/category/:id')
-  async findOneByCategory(@Param('id') id) {
-    return await this.notesService.findByCategory(id);
+  async findAllByCategory(@Param('id') id) {
+    return await this.notesService.findAllByCategory(id);
   }
 
   @Patch(':id')
@@ -45,12 +43,12 @@ export class NotesController {
     return deletedNote;
   }
 
-  @Delete('/delete-category/note/:noteId/category/:categoryId')
-  async removeRelation(
-    @Param('noteId') noteId: number,
-    @Param('categoryId') categoryId: number,
-  ) {
-    const deletedNote = await this.notesService.removeNoteCategory(noteId, categoryId);
-    return deletedNote;
-  }
+  // @Delete('/delete-category/note/:noteId/category/:categoryId')
+  // async removeRelation(
+  //   @Param('noteId') noteId: number,
+  //   @Param('categoryId') categoryId: number,
+  // ) {
+  //   const deletedNote = await this.notesService.removeNoteCategory(noteId, categoryId);
+  //   return deletedNote;
+  // }
 }

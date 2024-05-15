@@ -1,7 +1,6 @@
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { DataSource, DataSourceOptions } from "typeorm";
 
-
 ConfigModule.forRoot({
   envFilePath: `.${process.env.NODE_ENV}.env`,
 });

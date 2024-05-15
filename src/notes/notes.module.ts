@@ -8,7 +8,7 @@ import { CategoryEntity } from 'src/categories/entities/category.entity';
 import { NotesCategoriesEntity } from './entities/notes_categories.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([NoteEntity, NotesCategoriesEntity])],
+  imports: [TypeOrmModule.forFeature([NoteEntity, CategoryEntity, NotesCategoriesEntity])],
   controllers: [NotesController],
   providers: [NotesService],
 })
