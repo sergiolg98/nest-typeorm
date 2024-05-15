@@ -12,6 +12,7 @@ async function bootstrap() {
   app.setGlobalPrefix('api');
   app.enableCors(CORS);
   app.useGlobalPipes(new ValidationPipe({
+    whitelist: true,
     transformOptions: {
       enableImplicitConversion: true,
     }

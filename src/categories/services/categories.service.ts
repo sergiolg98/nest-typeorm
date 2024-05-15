@@ -48,13 +48,13 @@ export class CategoriesService {
   async remove(categoryId: any): Promise<DeleteResult | undefined> {
 
     const relations: number = await this.categoryRepository
-      .createQueryBuilder('category')
-      .leftJoinAndSelect('category.notesIncludes', 'notesCategory')
-      .where('category.id = :id', { id: categoryId })
+      .createQueryBuilder('categories')
+      .leftJoinAndSelect('categories.notesIncludes', 'notesCategory')
+      .where('categoryId = :id', { id: categoryId })
       .getCount();
 
     if (relations > 0)
-      throw new BadRequestException('Cannot delete Category. There are Notes associated to it.');
+       throw new BadRequestException('Cannot delete Category. There are Notes associated to it.');
 
     const deleted: DeleteResult = await this.categoryRepository.delete(categoryId);
     if (deleted.affected === 0)
