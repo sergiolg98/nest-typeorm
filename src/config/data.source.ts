@@ -14,10 +14,10 @@ export const DataSourceConfig: DataSourceOptions = {
   username: config.get('DATABASE_USERNAME'),
   password: config.get('DATABASE_PASSWORD'),
   database: config.get('DATABASE_NAME'),
-  synchronize: true, // @todo quitar luego
+  //synchronize: true,
   entities: [__dirname + '/../**/**/*.entity{.ts,.js}'],
-  logger: 'debug',
-  debug: true
+  //logger: 'debug',
+  //debug: true
 };
 
 export const AppDataSource = new DataSource(DataSourceConfig);
